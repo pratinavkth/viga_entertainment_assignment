@@ -78,7 +78,7 @@ class _DirectorState extends State<Director> {
         flags: YoutubePlayerFlags(
           autoPlay: false,
           controlsVisibleAtStart: true,
-          hideControls: true,
+          hideControls: false,
         ),
       );
     } else {
@@ -166,7 +166,6 @@ class _DirectorState extends State<Director> {
 
     List<dynamic> commentsList = commentsMap[key] ?? [];
 
-    // List<Comment> comments = await loadComments(videoId);
     commentsList.add({
       'role': role,
       'commentText': commentText,
@@ -176,7 +175,6 @@ class _DirectorState extends State<Director> {
 
     commentsMap[key] = commentsList;
 
-    // String commentJson = jsonEncode(comments.map((c) => c.toJson()).toList());
     await storage.write(key: 'comments', value: jsonEncode(commentsMap));
     print('updated comments Saved Comments: ${jsonEncode(commentsMap)}');
     debugStorage();

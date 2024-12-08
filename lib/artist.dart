@@ -121,19 +121,10 @@ class _ArtistState extends State<Artist> {
     String key = getStorageKey(widget.videoId, widget.videoType);
     Map<String, dynamic> allComments = {};
 
-    // if(comments is! List){
-    //   print("Unexpected data type: ${comments.runtimeType}");
-    //   comments = [];
-    // }
-
-    // await storage.write(key: key, value: jsonEncode(comments));
-    //   print("Saved comments: ${jsonEncode(comments)}");
-    String? existingData = await storage.read(key: key);
+     String? existingData = await storage.read(key: key);
     if (existingData != null) {
       allComments = jsonDecode(existingData);
     }
-        // existingData != null ? jsonDecode(existingData) : {};
-
     // Update or create comments for the current video ID
     allComments[widget.videoId] = comments;
 
@@ -275,7 +266,6 @@ class _ArtistState extends State<Artist> {
                       ? localController.value.isInitialized
                           ? FittedBox(
                               fit: BoxFit.fill,
-                              // aspectRatio: localController.value.aspectRatio,
                               child: SizedBox(
                                 width: localController.value.size.width,
                                 height: localController.value.size.height,

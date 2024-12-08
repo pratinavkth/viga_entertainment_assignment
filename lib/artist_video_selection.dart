@@ -11,7 +11,6 @@ class ArtistVideoSelection extends StatefulWidget {
 }
 
 class ArtistVideoSelectScreenState extends State<ArtistVideoSelection>{
-  // final TextEditingController _youtubeController = TextEditingController();
   
  // for adding the local video
   Future<void> selectLocalVideo() async{
