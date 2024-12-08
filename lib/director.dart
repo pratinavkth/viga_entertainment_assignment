@@ -127,7 +127,8 @@ class _DirectorState extends State<Director> {
       print('Saved Comments JSON: $commentsJson');
     }
   }
-   Future<void> addComment(String text) async {
+
+  Future<void> addComment(String text) async {
     if (text.trim().isEmpty) return;
     Comment newComment = Comment(
       commentText: text,
@@ -137,7 +138,8 @@ class _DirectorState extends State<Director> {
           : Duration.zero,
       videoId: widget.videoId,
     );
-    await saveComment('Director', newComment.commentText, newComment.videoTimeStamp, widget.videoId);
+    await saveComment('Director', newComment.commentText,
+        newComment.videoTimeStamp, widget.videoId);
     _commentController.clear();
     reloadComments();
   }
@@ -233,7 +235,7 @@ class _DirectorState extends State<Director> {
   }
 
   void addreplyComment(String commentId, String replyText) async {
-    if(replyText.trim().isEmpty) return;
+    if (replyText.trim().isEmpty) return;
 
     String? commentsJson = await storage.read(key: 'comments');
     Map<String, dynamic> commentsMap = commentsJson != null
@@ -250,7 +252,7 @@ class _DirectorState extends State<Director> {
       }
     }
 
-    if(parentComment != null){
+    if (parentComment != null) {
       Comment newReply = Comment(
         role: 'Director',
         commentText: replyText,
@@ -262,9 +264,7 @@ class _DirectorState extends State<Director> {
 
       parentComment.replies.add(newReply);
       await storage.write(
-        key: commentId, 
-        value: jsonEncode(parentComment.toJson())
-      );
+          key: commentId, value: jsonEncode(parentComment.toJson()));
       // reloadComments();
       setState(() {});
     }
@@ -414,26 +414,24 @@ class _DirectorState extends State<Director> {
           SizedBox(
             height: screenHeight * 0.02,
           ),
-          Padding(padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-          child: 
-
-          Row(
-            children: [
-              Expanded(child: 
-              TextField(
-                controller: _commentController,
-                decoration: InputDecoration(
-                  hintText: 'Add a comment...',
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    decoration: InputDecoration(
+                      hintText: 'Add a comment...',
+                    ),
+                  ),
                 ),
-              ),
-              ),
-              
-          ElevatedButton(
-            onPressed:() =>addComment(_commentController.text),
-            child: Text("Post"),
-          ),
-            ],
-          ),
+                ElevatedButton(
+                  onPressed: () => addComment(_commentController.text),
+                  child: Text("Post"),
+                ),
+              ],
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -460,8 +458,7 @@ class Comment {
   final String commentText;
   final Duration videoTimeStamp;
   final String videoId;
-  final List<Comment> replies;  // Add replies to comment
-
+  final List<Comment> replies; // Add replies to comment
 
   Comment(
       {required this.role,

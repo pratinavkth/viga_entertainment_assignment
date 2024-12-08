@@ -18,7 +18,7 @@ class RoleBase extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: ScreenHeight*0.2),
+            SizedBox(height: ScreenHeight * 0.2),
             const Text(
               "Select the Role",
               style: TextStyle(
@@ -30,10 +30,11 @@ class RoleBase extends StatelessWidget {
             SizedBox(height: ScreenHeight * 0.02),
             ElevatedButton(
               style: ButtonStyle(
-                minimumSize: WidgetStateProperty.all( Size(ScreenWidth*0.8, ScreenHeight*0.05)),
+                minimumSize: WidgetStateProperty.all(
+                    Size(ScreenWidth * 0.8, ScreenHeight * 0.05)),
                 backgroundColor: WidgetStateProperty.all(Colors.blue),
               ),
-              onPressed: () async{
+              onPressed: () async {
                 saveRole('Director');
                 Navigator.pushNamed(context, '/videoselection');
               },
@@ -46,13 +47,14 @@ class RoleBase extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: ScreenHeight*0.02),
+            SizedBox(height: ScreenHeight * 0.02),
             ElevatedButton(
               style: ButtonStyle(
-                minimumSize: WidgetStateProperty.all( Size(ScreenWidth*0.8, ScreenHeight*0.05)),
+                minimumSize: WidgetStateProperty.all(
+                    Size(ScreenWidth * 0.8, ScreenHeight * 0.05)),
                 backgroundColor: WidgetStateProperty.all(Colors.blue),
               ),
-              onPressed: () async{
+              onPressed: () async {
                 saveRole('Artist');
                 Navigator.pushNamed(context, '/artistvideoselection');
               },

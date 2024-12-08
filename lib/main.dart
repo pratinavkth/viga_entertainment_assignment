@@ -16,8 +16,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: AppRoutes.rolebase,
       onGenerateRoute: AppRoutes.generateRoute,
-      
     );
   }
 }
-

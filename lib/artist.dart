@@ -65,8 +65,9 @@ class _ArtistState extends State<Artist> {
 
   // Load comments from secure storage
   Future<void> loadComments() async {
-    String videoFileName = path.basename(widget.videoId); // Extract the file name
-  print("Extracted file name: $videoFileName");
+    String videoFileName =
+        path.basename(widget.videoId); // Extract the file name
+    print("Extracted file name: $videoFileName");
     String key = getStorageKey(widget.videoId, widget.videoType);
     String? commentsJson = await storage.read(key: 'comments');
     print("commentsJson Retrived$commentsJson");
@@ -76,9 +77,9 @@ class _ArtistState extends State<Artist> {
         var decodedData = jsonDecode(commentsJson);
         print("decodedData : $decodedData");
         if (decodedData is Map<String, dynamic>) {
-           print("Available keys: ${decodedData.keys}");
-           print("videoId: ${widget.videoId}");
-           print("widgetvideo id :${decodedData[videoFileName]}");
+          print("Available keys: ${decodedData.keys}");
+          print("videoId: ${widget.videoId}");
+          print("widgetvideo id :${decodedData[videoFileName]}");
           List<dynamic>? loadedcomments = decodedData[videoFileName];
           print("loadedcomments : $loadedcomments");
           if (loadedcomments != null) {
@@ -94,15 +95,13 @@ class _ArtistState extends State<Artist> {
               comments = [];
             });
           }
-        }
-          else {
-            print("Unexpected data type: ${decodedData.runtimeType}");
+        } else {
+          print("Unexpected data type: ${decodedData.runtimeType}");
 
-            setState(() {
-              comments = [];
-            });
-          }
-        
+          setState(() {
+            comments = [];
+          });
+        }
       } catch (e) {
         print('Error parsing comments: $e');
         setState(() {
@@ -121,7 +120,7 @@ class _ArtistState extends State<Artist> {
     String key = getStorageKey(widget.videoId, widget.videoType);
     Map<String, dynamic> allComments = {};
 
-     String? existingData = await storage.read(key: key);
+    String? existingData = await storage.read(key: key);
     if (existingData != null) {
       allComments = jsonDecode(existingData);
     }
@@ -155,7 +154,6 @@ class _ArtistState extends State<Artist> {
   String getStorageKey(String videoId, String videoType) {
     return 'comments_${videoType}_$videoId';
   }
-
 
   // Build the UI for each comment (including replies)
   Widget buildCommentTree(Map<String, dynamic> comment) {
@@ -312,7 +310,6 @@ class _ArtistState extends State<Artist> {
                   ),
                 ],
               ),
-
             SizedBox(height: screenHeight * 0.05),
             Expanded(
               child: ListView.builder(
