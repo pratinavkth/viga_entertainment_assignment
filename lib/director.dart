@@ -131,13 +131,13 @@ class _DirectorState extends State<Director> {
     if (text.trim().isEmpty) return;
     Comment newComment = Comment(
       commentText: text,
-      role: 'User', // Replace with actual user name if available
+      role: 'Director', // Replace with actual user name if available
       videoTimeStamp: widget.videoType == 'local'
           ? localcontroller.value.position
           : Duration.zero,
       videoId: widget.videoId,
     );
-    await saveComment('User', newComment.commentText, newComment.videoTimeStamp, widget.videoId);
+    await saveComment('Director', newComment.commentText, newComment.videoTimeStamp, widget.videoId);
     _commentController.clear();
     reloadComments();
   }
@@ -254,7 +254,7 @@ class _DirectorState extends State<Director> {
 
     if(parentComment != null){
       Comment newReply = Comment(
-        role: 'User',
+        role: 'Director',
         commentText: replyText,
         videoTimeStamp: widget.videoType == 'local'
             ? localcontroller.value.position
