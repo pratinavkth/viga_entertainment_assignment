@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:path/path.dart' as path;
 
 class Director extends StatefulWidget {
   final String videoType;
@@ -109,7 +110,6 @@ class _DirectorState extends State<Director> {
 
   void backward() {
     final currentPosition = localcontroller.value.position;
-    // final duration = localcontroller.value.duration;
     final newPosition = currentPosition - const Duration(seconds: 10);
 
     if (newPosition > Duration.zero) {
@@ -158,7 +158,7 @@ class _DirectorState extends State<Director> {
   // for saving the comment
   Future<void> saveComment(String role, String commentText,
       Duration videoTimeStamp, String videoId) async {
-    String key = getStorageKey(widget.videoId, widget.videoType);
+    String key = getStorageKey(videoId, widget.videoType);
     String? commentsJson = await storage.read(key: 'comments');
     print('Raw comments JSON for key $key: $commentsJson');
 
@@ -192,27 +192,18 @@ class _DirectorState extends State<Director> {
     return videoId;
   }
 
-  Future<List<String>> getKeysForVideoId(String videoId) async {
-    try {
-      // Read all key-value pairs from secure storage
-      Map<String, String> allEntries = await storage.readAll();
-
-      // Filter keys that include the videoId
-      List<String> relatedKeys = allEntries.keys
-          .where(
-              (key) => key.contains(videoId)) // Adjust filter logic as needed
-          .toList();
-
-      return relatedKeys;
-    } catch (e) {
-      print('Error while fetching keys for videoId $videoId: $e');
-      return [];
-    }
+  //  for getting the normalized key
+  String getNormalizedKey(String videoId) {
+    return widget.videoType == 'local'
+        ? path.basename(videoId) // Extract file name
+        : videoId; // Use full videoId for network videos
   }
 
   Future<List<Comment>> loadComments(String videoId) async {
     try {
-      String key = getStorageKey(videoId, widget.videoType);
+      String key = getNormalizedKey(videoId);
+      print('Loading comments for key $key');
+
       String? commentsJson = await storage.read(key: 'comments');
       print('Comments JSON for key $key: $commentsJson');
 
@@ -221,7 +212,10 @@ class _DirectorState extends State<Director> {
       }
 
       Map<String, dynamic> commentsMap = jsonDecode(commentsJson);
+      print('Comments map for key $key: $commentsMap');
+      print('Available keys in commentsMap: ${commentsMap.keys}');
       List<dynamic> commentsList = commentsMap[key] ?? [];
+      print('Comments list for videofilename : $commentsList');
 
       return commentsList.map((json) => Comment.fromJson(json)).toList();
     } catch (e) {
@@ -231,7 +225,9 @@ class _DirectorState extends State<Director> {
   }
 
   void reloadComments() {
-    setState(() {});
+    setState(() {
+      loadComments(widget.videoId);
+    });
   }
 
   void addreplyComment(String commentId, String replyText) async {
@@ -241,33 +237,53 @@ class _DirectorState extends State<Director> {
     Map<String, dynamic> commentsMap = commentsJson != null
         ? jsonDecode(commentsJson) as Map<String, dynamic>
         : {};
-
-    List<dynamic> commentsList = commentsMap[widget.videoId] ?? [];
-
-    Comment? parentComment;
+    String key = getNormalizedKey(widget.videoId);
+    List<dynamic> commentsList = commentsMap[key] ?? [];
+    // Comment? parentComment;
     for (var comment in commentsList) {
       if (comment['videoId'] == commentId) {
-        parentComment = Comment.fromJson(comment);
-        break;
+        Comment parentComment = Comment.fromJson(comment);
+        // if (parentComment != null) {
+        Comment newReply = Comment(
+          role: 'Artist',
+          commentText: replyText,
+          videoTimeStamp: widget.videoType == 'local'
+              ? localcontroller.value.position
+              : Duration.zero,
+          videoId: widget.videoId,
+        );
+
+        parentComment.replies.add(newReply);
+        int index = commentsList.indexOf(comment);
+        commentsList[index] = parentComment.toJson();
+        commentsMap[key] = commentsList;
+        await storage.write(key: 'comments', value: jsonEncode(commentsMap));
+        // reloadComments();
+        setState(() {});
+        return;
+        // }
       }
     }
+  }
 
-    if (parentComment != null) {
-      Comment newReply = Comment(
-        role: 'Director',
-        commentText: replyText,
-        videoTimeStamp: widget.videoType == 'local'
-            ? localcontroller.value.position
-            : Duration.zero,
-        videoId: widget.videoId,
-      );
-
-      parentComment.replies.add(newReply);
-      await storage.write(
-          key: commentId, value: jsonEncode(parentComment.toJson()));
-      // reloadComments();
-      setState(() {});
-    }
+  Widget buildCommentItem(Comment comment) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          title: Text('${comment.role}: ${comment.commentText}'),
+          subtitle: Text(
+              'Timestamp: ${comment.videoTimeStamp.inMinutes}:${comment.videoTimeStamp.inSeconds % 60}'),
+        ),
+        if (comment.replies.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Column(
+              children: comment.replies.map(buildCommentItem).toList(),
+            ),
+          ),
+      ],
+    );
   }
 
   // for displaying the comments
@@ -316,16 +332,8 @@ class _DirectorState extends State<Director> {
         print(
             'comments to display: ${comments.map((c) => c.commentText).toList()}');
 
-        return ListView.builder(
-          itemCount: comments.length,
-          itemBuilder: (context, index) {
-            final comment = comments[index];
-            return ListTile(
-              title: Text('${comment.role}: ${comment.commentText}'),
-              subtitle: Text(
-                  'Timestamp: ${comment.videoTimeStamp.inMinutes}:${comment.videoTimeStamp.inSeconds % 60}'),
-            );
-          },
+        return ListView(
+          children: comments.map(buildCommentItem).toList(),
         );
       },
     );
@@ -336,10 +344,7 @@ class _DirectorState extends State<Director> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body:
-          //  SingleChildScrollView(
-          // child:
-          Column(
+      body: Column(
         children: [
           SizedBox(
             height: screenHeight * 0.1,

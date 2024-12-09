@@ -63,12 +63,17 @@ class _ArtistState extends State<Artist> {
     }
   }
 
+  String getNormalizedKey(String videoId) {
+    return widget.videoType == 'local'
+        ? path.basename(videoId) // Extract file name
+        : videoId; // Use full videoId for network videos
+  }
+
   // Load comments from secure storage
   Future<void> loadComments() async {
-    String videoFileName =
-        path.basename(widget.videoId); // Extract the file name
-    print("Extracted file name: $videoFileName");
-    String key = getStorageKey(widget.videoId, widget.videoType);
+    String key = getNormalizedKey(widget.videoId);
+    print("key : $key");
+
     String? commentsJson = await storage.read(key: 'comments');
     print("commentsJson Retrived$commentsJson");
     if (commentsJson != null) {
@@ -79,8 +84,9 @@ class _ArtistState extends State<Artist> {
         if (decodedData is Map<String, dynamic>) {
           print("Available keys: ${decodedData.keys}");
           print("videoId: ${widget.videoId}");
-          print("widgetvideo id :${decodedData[videoFileName]}");
-          List<dynamic>? loadedcomments = decodedData[videoFileName];
+
+          print("widgetvideo id :${decodedData[key]}");
+          List<dynamic>? loadedcomments = decodedData[key];
           print("loadedcomments : $loadedcomments");
           if (loadedcomments != null) {
             setState(() {
@@ -117,7 +123,8 @@ class _ArtistState extends State<Artist> {
 
   // Save updated comments to secure storage
   Future<void> saveComments() async {
-    String key = getStorageKey(widget.videoId, widget.videoType);
+    String key = getNormalizedKey(widget.videoId);
+
     Map<String, dynamic> allComments = {};
 
     String? existingData = await storage.read(key: key);
@@ -125,7 +132,7 @@ class _ArtistState extends State<Artist> {
       allComments = jsonDecode(existingData);
     }
     // Update or create comments for the current video ID
-    allComments[widget.videoId] = comments;
+    allComments[key] = comments;
 
     await storage.write(key: 'comments', value: jsonEncode(allComments));
     print("Saved comments: ${jsonEncode(allComments)}");
